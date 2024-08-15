@@ -15,7 +15,7 @@ class CustomLogger(logging.Logger):
             extra['lvl'] = 0
         super()._log(level, msg, args, exc_info, extra, stack_info, stacklevel)
 
-class LoggerSetup:
+class IndentedLogger:
     def __init__(self, name, level=logging.DEBUG, log_file=None):
         logging.setLoggerClass(CustomLogger)
         self.logger = logging.getLogger(name)
@@ -39,4 +39,3 @@ class LoggerSetup:
 
     def get_logger(self):
         return self.logger
-
