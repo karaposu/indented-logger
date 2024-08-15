@@ -15,7 +15,8 @@ To get output like this :
 ```
 
 ```python
-from IndentedLogger.indented_logger import IndentedLogger
+from indented_logger import IndentedLogger
+import logging
 
 # Setup the logger
 logger_setup = IndentedLogger(name='my_logger', level=logging.INFO, log_file='app.log')
@@ -28,6 +29,13 @@ logger.info('Processing data', extra={'lvl': 2})
 logger.info('Saving results', extra={'lvl': 1})
 logger.info('Process complete', extra={'lvl': 0})
 
+```
+## Installation
+
+You can install IndentedLogger via pip:
+
+```bash
+pip install  indented_logger
 ```
 
 
@@ -48,10 +56,5 @@ IndentedLogger is a lightweight, easy-to-use wrapper for Python's built-in loggi
 - **Dual Output**: Supports logging to both console and file, ensuring consistent formatting across all outputs.
 - **Minimalist Design**: A simple, straightforward approach to enhancing your logging experience without unnecessary overhead.
 
-## Installation
 
-You can install IndentedLogger via pip:
-
-```bash
-pip install  indented_logger
 
