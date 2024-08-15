@@ -35,11 +35,9 @@ logger.info('Process complete', extra={'lvl': 0})
 You can install IndentedLogger via pip:
 
 ```bash
-pip install  indented_logger
+pip install indented_logger
 ```
 
-
-IndentedLogger is a lightweight, easy-to-use wrapper for Python's built-in logging module. By extending the usual logging capabilities, it introduces indentation levels to your log messages without adding unnecessary complexity. This small enhancement helps you organize and visualize the structure of your log output, making debugging and process tracking more intuitive.
 
 ## Benefits of Using IndentedLogger
 
