@@ -5,11 +5,11 @@ import os
 
 setup(
     name='indented_logger',  # Package name
-    version='0.1.0',  # Version of your package
+    version='0.1.1',  # Version of your package
     author='Enes Kuzucu',  # Your name
 
     description='A module to use common logger module with indentation support ',  # Short description
-    long_description=open('readme.md').read(),  # Long description from a README file
+    long_description=open('README.md').read(),  # Long description from a README file
     long_description_content_type='text/markdown',  # Type of the long description
 
     packages=find_packages(),  # Automatically find packages in the directory
