@@ -119,20 +119,25 @@ class CustomLogger(logging.Logger):
     def _log_with_indent(self, level, msg, args, exc_info=None, extra=None, stack_info=False, stacklevel=1):
         if extra is None:
             extra = {}
-        super()._log(level, msg, args, exc_info, extra, stack_info, stacklevel)
+        super()._log(level, msg, args, exc_info=exc_info, extra=extra, stack_info=stack_info, stacklevel=stacklevel)
 
     def _log_with_lvl(self, level, msg, args, **kwargs):
         stacklevel = kwargs.pop('stacklevel', 3)
+        stack_info = kwargs.pop('stack_info', False)
         extra = kwargs.pop('extra', {})
         lvl = kwargs.pop('lvl', 0)
+        exc_info = kwargs.pop('exc_info', None)
         if 'lvl' in extra:
             extra['lvl'] += lvl
         else:
             extra['lvl'] = lvl
-        # Merge any remaining kwargs into extra
+        # Merge any remaining kwargs into extra, excluding reserved keys
+        reserved_keys = ('exc_info', 'stack_info', 'stacklevel', 'extra', 'lvl')
         for key in kwargs:
+            if key in reserved_keys:
+                continue  # Skip reserved keys
             extra[key] = kwargs[key]
-        self._log_with_indent(level, msg, args, extra=extra, stacklevel=stacklevel)
+        self._log_with_indent(level, msg, args, exc_info=exc_info, extra=extra, stack_info=stack_info, stacklevel=stacklevel)
 
     def debug(self, msg, *args, **kwargs):
         self._log_with_lvl(logging.DEBUG, msg, args, **kwargs)
@@ -210,8 +215,8 @@ if __name__ == "__main__":
             # Simulate an error
             raise ValueError("Invalid data format")
         except ValueError as e:
-            logger.error(f'Failed to load data: {e}', lvl=2)
-            logger.critical('System crash')
+            logger.error(f'Failed to load data: {e}', lvl=2, exc_info=True)
+            logger.critical('System crash', exc_info=True)
 
 
     @log_indent
