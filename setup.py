@@ -5,7 +5,7 @@ import os
 
 setup(
     name='indented_logger',  # Package name
-    version='0.1.8',  # Version of your package
+    version='0.2.0',  # Version of your package
     author='Enes Kuzucu',  # Your name
 
     description='A module to use common logger module with indentation support ',  # Short description
