@@ -1,14 +1,14 @@
-# indented_logger/logging_config.py
-
 import logging
 from .formatter import IndentFormatter
 
-def setup_logging(level=logging.DEBUG, log_file=None, include_func=False,
-                  truncate_messages=False, min_func_name_col=80,
+def setup_logging(level=logging.DEBUG, log_file=None, include_func=False, include_module=False,
+                  func_module_format='{funcName}', truncate_messages=False, min_func_name_col=80,
                   use_logger_hierarchy=False, indent_spaces=4, datefmt=None):
-    # Create the formatter with the new parameter
+    # Create the formatter with the new parameters
     formatter = IndentFormatter(
         include_func=include_func,
+        include_module=include_module,
+        func_module_format=func_module_format,
         truncate_messages=truncate_messages,
         min_func_name_col=min_func_name_col,
         use_logger_hierarchy=use_logger_hierarchy,
@@ -32,6 +32,3 @@ def setup_logging(level=logging.DEBUG, log_file=None, include_func=False,
         file_handler = logging.FileHandler(log_file)
         file_handler.setFormatter(formatter)
         logger.addHandler(file_handler)
-
-    # Optionally disable propagation if you don't want logs to propagate to the root logger in other libraries
-    # logger.propagate = False

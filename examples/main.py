@@ -5,6 +5,8 @@ from indented_logger import setup_logging
 setup_logging(
     level=logging.DEBUG,
     include_func=True,
+    include_module=True,
+    func_module_format='{funcName}',
     truncate_messages=False,
     min_func_name_col=80,
     use_logger_hierarchy=True,
