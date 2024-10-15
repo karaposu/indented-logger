@@ -1,21 +1,10 @@
 
-# IndentedLogger
+# indented_logger
 
-**IndentedLogger** is a powerful yet simple wrapper around Python's standard `logging` package that adds automatic indentation and enhanced formatting support. It visually represents the hierarchical structure and depth of your logging messages, making it easier to understand the flow of execution in complex systems.
+**indented_logger** is a custom formatter for Python's standard `logging` package that adds **automatic indentation** and enhanced formatting support. (Without altering original logger class and **not causing any compatibility issues**)
 
-## Table of Contents
+It visually represents the hierarchical structure and depth of your logging messages, making it easier to understand the flow of execution in complex systems. And it  
 
-- [Features](#features)
-- [Installation](#installation)
-- [Usage](#usage)
-  - [Basic Setup](#basic-setup)
-  - [Automatic Indentation with Decorators](#automatic-indentation-with-decorators)
-  - [Manual Indentation with `lvl`](#manual-indentation-with-lvl)
-  - [Including or Excluding Function Names](#including-or-excluding-function-names)
-  - [Aligning Function Names at a Specific Column](#aligning-function-names-at-a-specific-column)
-  - [Message Truncation (Optional)](#message-truncation-optional)
-- [Benefits](#benefits)
-- [License](#license)
 
 ## Features
 
@@ -36,8 +25,6 @@ You can install IndentedLogger via pip:
 pip install indented_logger
 ```
 
-*Note: Ensure that your Python version is **3.8** or higher to utilize all features effectively.*
-
 ## Usage
 
 ### Basic Setup
@@ -45,20 +32,15 @@ pip install indented_logger
 ```python
 from indented_logger import setup_logging
 import logging
-
 # Configure the logger
 setup_logging(level=logging.INFO, include_func=True)
-
 # Get the logger
 logger = logging.getLogger(__name__)
-
 # Basic logging, indented_logger does not cause compatibility issues with normal loggers
 logger.info('Starting process A')
-
 # manual indentation
-logger.info('Details of process A', extra={"lvl":1})
-logger.info('Deeper Details of process A', extra={"lvl":2})
-
+logger.info('Details of process A', extra={'lvl':1})
+logger.info('Deeper Details of process A', extra={'lvl':2})
 logger.info('Process complete')
 ```
 
@@ -256,4 +238,4 @@ For advanced use cases, you can extend or modify the `IndentFormatter` class to 
 
 ---
 
-This README now reflects your recent changes, including the use of the `lvl` parameter for manual indentation, and simplifies the logging setup to ensure ease of use across various scenarios.
+
