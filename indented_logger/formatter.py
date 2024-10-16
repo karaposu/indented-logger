@@ -1,19 +1,20 @@
-# formatter.py
+# indented_logger/formatter.py
 
 import logging
 from .indent import get_indent_level
 
 class IndentFormatter(logging.Formatter):
     def __init__(self, include_func=False, include_module=False, func_module_format=None,
-                 truncate_messages=False, min_func_name_col=80, use_logger_hierarchy=False,
-                 datefmt=None, indent_spaces=4, debug=False):
+                 truncate_messages=False, min_func_name_col=80, indent_modules=False,
+                 indent_packages=False, datefmt=None, indent_spaces=4, debug=False):
         self.include_func = include_func
         self.include_module = include_module
         self.truncate_messages = truncate_messages
         self.min_func_name_col = min_func_name_col
-        self.use_logger_hierarchy = use_logger_hierarchy
+        self.indent_modules = indent_modules
+        self.indent_packages = indent_packages
         self.indent_spaces = indent_spaces
-        self.debug = debug  # New debug flag
+        self.debug = debug  # Debug flag
 
         # Dynamically build the func_module_format based on include flags
         if func_module_format is None:
@@ -46,8 +47,12 @@ class IndentFormatter(logging.Formatter):
         # Manual indent from 'lvl' parameter
         manual_indent = getattr(record, 'lvl', 0)
 
-        # Hierarchy-based indent from logger name
-        hierarchy_indent = record.name.count('.') if self.use_logger_hierarchy else 0
+        # Indentation based on module and package hierarchy
+        hierarchy_indent = 0
+        if self.indent_modules and record.name != '__main__':
+            hierarchy_indent += 1
+        if self.indent_packages:
+            hierarchy_indent += record.name.count('.')
 
         # Total indentation level
         total_indent = thread_indent + manual_indent + hierarchy_indent
@@ -67,9 +72,6 @@ class IndentFormatter(logging.Formatter):
         # Prepare variables for formatting
         asctime = self.formatTime(record, self.datefmt)
         levelname = f"{record.levelname:<8}"
-
-        # Build the base log line without func_module_info
-        base_log = f"{asctime} - {levelname} - {message}"
 
         # Add debug statements if debug mode is enabled
         if self.debug:

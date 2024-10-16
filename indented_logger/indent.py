@@ -1,6 +1,5 @@
 # indented_logger/indent.py
 
-
 import threading
 
 # Thread-local storage for indentation levels
@@ -17,4 +16,3 @@ def increase_indent():
 def decrease_indent():
     current = get_indent_level()
     _thread_local.indent_level = max(current - 1, 0)
-
