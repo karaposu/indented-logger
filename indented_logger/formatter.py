@@ -1,4 +1,4 @@
-# here is formatter.py
+# formatter.py
 
 import logging
 from .indent import get_indent_level
@@ -6,13 +6,14 @@ from .indent import get_indent_level
 class IndentFormatter(logging.Formatter):
     def __init__(self, include_func=False, include_module=False, func_module_format=None,
                  truncate_messages=False, min_func_name_col=80, use_logger_hierarchy=False,
-                 datefmt=None, indent_spaces=4):
+                 datefmt=None, indent_spaces=4, debug=False):
         self.include_func = include_func
         self.include_module = include_module
         self.truncate_messages = truncate_messages
         self.min_func_name_col = min_func_name_col
         self.use_logger_hierarchy = use_logger_hierarchy
         self.indent_spaces = indent_spaces
+        self.debug = debug  # New debug flag
 
         # Dynamically build the func_module_format based on include flags
         if func_module_format is None:
@@ -70,12 +71,21 @@ class IndentFormatter(logging.Formatter):
         # Build the base log line without func_module_info
         base_log = f"{asctime} - {levelname} - {message}"
 
+        # Add debug statements if debug mode is enabled
+        if self.debug:
+            print("DEBUG: record.name =", record.name)
+            print("DEBUG: record.funcName =", record.funcName)
+            print("DEBUG: func_module_format =", self.func_module_format)
+
         # Build the func_module_info string based on the format provided
         if self.func_module_format:
             func_module_info = self.func_module_format.format(
                 funcName=record.funcName,
-                moduleName=record.name  # This is the logger's name, typically the module name
+                moduleName=record.name
             )
+            if self.debug:
+                print("DEBUG: func_module_info =", func_module_info)
+
             record.func_module_info = func_module_info
 
             # Calculate padding to align func_module_info at min_func_name_col
