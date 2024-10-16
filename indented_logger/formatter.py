@@ -1,21 +1,38 @@
+# here is formatter.py
+
 import logging
 from .indent import get_indent_level
 
 class IndentFormatter(logging.Formatter):
-    def __init__(self, include_func=False, include_module=False, func_module_format='{funcName}',
+    def __init__(self, include_func=False, include_module=False, func_module_format=None,
                  truncate_messages=False, min_func_name_col=80, use_logger_hierarchy=False,
                  datefmt=None, indent_spaces=4):
         self.include_func = include_func
         self.include_module = include_module
-        self.func_module_format = func_module_format
         self.truncate_messages = truncate_messages
         self.min_func_name_col = min_func_name_col
         self.use_logger_hierarchy = use_logger_hierarchy
         self.indent_spaces = indent_spaces
 
+        # Dynamically build the func_module_format based on include flags
+        if func_module_format is None:
+            # Default format based on inclusion flags
+            placeholders = []
+            if self.include_module:
+                placeholders.append('{moduleName}')
+            if self.include_func:
+                placeholders.append('{funcName}')
+            if placeholders:
+                self.func_module_format = ':'.join(placeholders)
+            else:
+                self.func_module_format = ''
+        else:
+            # Use the provided func_module_format
+            self.func_module_format = func_module_format
+
         # Build the format string dynamically
-        if self.include_func or self.include_module:
-            fmt = '%(asctime)s - %(levelname)-8s - %(message)s%(padding)s%(func_module_info)s'
+        if self.func_module_format:
+            fmt = '%(asctime)s - %(levelname)-8s - %(message)s%(padding)s{%(func_module_info)s}'
         else:
             fmt = '%(asctime)s - %(levelname)-8s - %(message)s'
 
@@ -53,20 +70,13 @@ class IndentFormatter(logging.Formatter):
         # Build the base log line without func_module_info
         base_log = f"{asctime} - {levelname} - {message}"
 
-        # Initialize func_module_info
-        record.func_module_info = ''
-        if self.include_func or self.include_module:
-            func_name = record.funcName
-            module_name = record.name  # This is the logger's name, typically the module name
-
-            # Build the func_module_info string based on the format provided
+        # Build the func_module_info string based on the format provided
+        if self.func_module_format:
             func_module_info = self.func_module_format.format(
-                funcName=func_name,
-                moduleName=module_name
+                funcName=record.funcName,
+                moduleName=record.name  # This is the logger's name, typically the module name
             )
-
-            # Add braces around func_module_info
-            func_module_info = f"{{{func_module_info}}}"
+            record.func_module_info = func_module_info
 
             # Calculate padding to align func_module_info at min_func_name_col
             desired_column = self.min_func_name_col
@@ -79,7 +89,6 @@ class IndentFormatter(logging.Formatter):
             else:
                 padding = ' '
             record.padding = padding
-            record.func_module_info = func_module_info
         else:
             record.padding = ''
             record.func_module_info = ''
