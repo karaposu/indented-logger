@@ -117,3 +117,27 @@ class IndentFormatter(logging.Formatter):
             # Restore the original message and arguments
             record.msg = original_msg
             record.args = original_args
+
+# Define ANSI color codes
+RESET = '\033[0m'
+RED = '\033[31m'
+GREEN = '\033[32m'
+YELLOW = '\033[33m'
+BLUE = '\033[34m'
+MAGENTA = '\033[35m'
+CYAN = '\033[36m'
+
+# Use in your formatter
+class ColorFormatter(logging.Formatter):
+    LEVEL_COLORS = {
+        logging.DEBUG: CYAN,
+        logging.INFO: GREEN,
+        logging.WARNING: YELLOW,
+        logging.ERROR: RED,
+        logging.CRITICAL: MAGENTA,
+    }
+
+    def format(self, record):
+        color = self.LEVEL_COLORS.get(record.levelno, RESET)
+        message = super().format(record)
+        return f"{color}{message}{RESET}"

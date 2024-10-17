@@ -1,5 +1,8 @@
 # Guide to Setting Up Logging in a Multi-Module Python Application
 
+- best practices of logger usage.
+- how to use loggers in classes and modules
+
 Proper logging is essential for monitoring, debugging, and maintaining applications, especially as they grow in complexity with multiple modules and packages. This guide will walk you through best practices for setting up logging in a Python application with many modules, incorporating features from the `indented_logger` package for enhanced readability.
 
 ---

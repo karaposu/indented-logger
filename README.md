@@ -13,6 +13,13 @@
 - **Thread Safety**: Manages indentation levels per thread, ensuring correct behavior in multi-threaded applications.
 - **Easy Integration**: Seamlessly integrates with existing logging setups with minimal changes.
 
+______
+
+For detailed documentation which talks about best practices and limitations, see [Dive deep in to loggers](learn_more_about_loggers.md).
+______
+
+
+
 ## Installation
 
 You can install `indented_logger` via pip:
@@ -89,7 +96,7 @@ start_process()
 2024-08-15 12:34:56 - INFO     - Process complete                            {start_process}
 ```
 
-### Automatic Child Logger Indentation
+### Automatic Child Logger Indentation ( indent packages )
 
 if enabled, **automatically adjusts the indentation of child loggers based on their relationship to the parent logger**. 
 This is especially useful in multi-module applications, ensuring that log output is structured and clearly reflects the nested hierarchy of 
@@ -104,8 +111,7 @@ setup_logging(
     level=logging.INFO,
     include_func=True,
     include_module=False,
-    func_module_format='{funcName}',
-    use_logger_hierarchy=True
+    indent_packages=True
 )
 # Create hierarchical loggers
 logger_root = logging.getLogger('myapp')
@@ -133,26 +139,8 @@ if __name__ == '__main__':
 
 **Note:** Replace `<function_name>` with the actual function name if `include_func` is `True`.
 
-### Customizing Function and Module Names
 
-You can customize the inclusion and formatting of function and module names using parameters.
-
-```python
-# Setup the logger with custom formatting
-setup_logging(
-    level=logging.INFO,
-    include_func=True,
-    include_module=True,
-    func_module_format='{moduleName}:{funcName}',  # Customize as needed
-    min_func_name_col=80
-)
-```
-
-- **Parameters:**
-  - `include_func` (bool): Include function names in logs.
-  - `include_module` (bool): Include module names in logs.
-  - `func_module_format` (str): Format string for combining function and module names. Placeholders `{funcName}` and `{moduleName}` are available.
-
+  
 ### Aligning Function Names at a Specific Column
 
 Align function and module names at a specified column using the `min_func_name_col` parameter.
@@ -163,7 +151,6 @@ setup_logging(
     level=logging.INFO,
     include_func=True,
     include_module=True,
-    func_module_format='{moduleName}:{funcName}',
     min_func_name_col=100
 )
 ```
@@ -197,177 +184,196 @@ logger.info('This is a very long log message that will be truncated to a maximum
 
 `indented_logger` uses thread-local storage to manage indentation levels per thread, ensuring correct behavior in multi-threaded applications.
 
-### Handling Modules Run Directly
+---------
 
-When you have modules that can be run directly (e.g., via `python -m module1`), ensure that `indented_logger` is configured in the `main()` function of the module.
+## Introduction
 
-```python
-# module1.py
+In logging, indentation can be a powerful tool to represent the hierarchical structure of your application's execution flow. It helps in understanding which functions or modules are calling others and how deep into the execution stack you are at any point.
 
-import logging
-import module2
+However, automatically indenting logs based on module transitions during application flow is not feasible due to the stateless nature of the logging system and the complexities involved in tracking dynamic execution paths. Instead, **Indented Logger** provides a safe and compatible way to achieve similar results by offering:
 
-logger = logging.getLogger(__name__)
+- **Automatic indentation based on module and package hierarchy**
+- **Manual indentation control using decorators**
 
-def module1_function():
-    logger.info('Entered module1_function')
-    module2.module2_function()
-    logger.info('Exiting module1_function')
+## Why Automatic Indentation Based on Module Transitions Isn't Feasible
 
-def main():
-    from indented_logger import setup_logging
-    setup_logging(
-        level=logging.INFO,
-        include_func=True,
-        use_logger_hierarchy=True
-    )
-    logger.info('Running module1 as main')
-    module1_function()
+In a perfect Python world, we might wish for logs to automatically indent whenever the execution flow moves from one module to another. However, this approach faces several challenges:
 
-if __name__ == '__main__':
-    main()
-```
+1. **Stateless Logging System**: The Python logging module processes each log record independently without retaining state between records. It doesn't track the execution flow or module transitions over time.
 
-## Advanced Usage
+2. **Concurrency Issues**: In multi-threaded applications, logs from different threads and modules can interleave. Tracking module transitions globally can lead to incorrect indentation and confusion.
 
-### Setting Up Logging in Multi-Module Applications
+3. **Complex Execution Paths**: Applications often have dynamic and non-linear execution flows. Modules may call each other in various orders, making it difficult to determine indentation solely based on module transitions.
 
-Follow best practices for logging in multi-module applications:
+Due to these reasons, automatically indenting logs based on module transitions isn't practical or reliable.
 
-1. **Use Module-Level Loggers**: In each module, create a logger using `logger = logging.getLogger(__name__)`.
-2. **Configure Logging in Main Scripts**: Set up logging in the main entry point of your application.
-3. **Handle Modules Run Directly**: Include a `main()` function and configure logging within it for modules that can be run directly.
-4. **Avoid Side Effects**: Prevent logging configuration from executing during module imports.
+## Achieving Hierarchical Indentation
 
-### Example Project Structure
+To represent the hierarchical structure of your application's execution flow effectively, **Indented Logger** provides three mechanisms:
+
+1. **Automatic Indentation Based on Module Hierarchy (`indent_modules`)**
+2. **Automatic Indentation Based on Package Hierarchy (`indent_packages`)**
+3. **Manual Indentation Control Using Decorators (`@log_indent`)**
+
+### Indentation Parameters
+
+#### 1. `indent_modules` (Boolean)
+
+- **Purpose**: Indents logs from any module that is not the main module (`__main__`).
+- **Usage**: Set to `True` to enable indentation for all non-main modules.
+- **Example**:
+  ```python
+  setup_logging(indent_modules=True)
+  ```
+
+#### 2. `indent_packages` (Boolean)
+
+- **Purpose**: Indents logs based on the package hierarchy by counting the number of dots in the module's name.
+- **Usage**: Set to `True` to enable indentation based on package depth.
+- **Example**:
+  ```python
+  setup_logging(indent_packages=True)
+  ```
+
+### Using Decorators for Function Call Hierarchy
+
+#### `@log_indent`
+
+- **Purpose**: Manually control indentation to reflect the function call hierarchy.
+- **Usage**: Decorate functions where you want to increase the indentation level upon entry and decrease it upon exit.
+- **Example**:
+  ```python
+  from indented_logger import log_indent
+
+  @log_indent
+  def my_function():
+      logger.info("Inside my_function")
+  ```
+
+By combining these mechanisms, you can achieve a comprehensive and accurate representation of both your application's static structure (modules and packages) and dynamic execution flow (function calls).
+
+
+### Semi-Auto Indentation Example
+
+Consider the following project structure:
 
 ```
 my_app/
 ├── main.py
-├── module1/
-│   ├── __init__.py
-│   └── module1.py
-├── module2/
-│   ├── __init__.py
-│   └── module2.py
+├── module_a.py
+└── package_b/
+    ├── __init__.py
+    ├── module_b1.py
+    └── module_b2.py
 ```
 
-**`main.py`:**
+#### `main.py`
 
 ```python
-import logging
 from indented_logger import setup_logging
-from module1.module1 import module1_function
-
-# Configure logging
-setup_logging(
-    level=logging.INFO,
-    include_func=True,
-    include_module=True,
-    func_module_format='{moduleName}:{funcName}',
-    use_logger_hierarchy=True,
-    indent_spaces=4,
-    min_func_name_col=80
-)
-
-logger = logging.getLogger(__name__)
+import logging
+import module_a
+from package_b import module_b1
 
 def main():
-    logger.info('Starting main function')
-    module1_function()
-    logger.info('Finished main function')
+    logger = logging.getLogger(__name__)
+    logger.info("Starting main")
+    module_a.func_a()
+    module_b1.func_b1()
 
 if __name__ == '__main__':
-    main()
-```
-
-**`module1/module1.py`:**
-
-```python
-import logging
-from module2.module2 import module2_function
-
-logger = logging.getLogger(__name__)
-
-def module1_function():
-    logger.info('Entered module1_function')
-    module2_function()
-    logger.info('Exiting module1_function')
-
-def main():
-    from indented_logger import setup_logging
     setup_logging(
-        level=logging.INFO,
+        level=logging.DEBUG,
         include_func=True,
         include_module=True,
-        func_module_format='{moduleName}:{funcName}',
-        use_logger_hierarchy=True
+        indent_modules=True,
+        indent_packages=True,
+        indent_spaces=4
     )
-    logger.info('Running module1 as main')
-    module1_function()
-
-if __name__ == '__main__':
     main()
 ```
 
-**`module2/module2.py`:**
+#### `module_a.py`
 
 ```python
 import logging
 
 logger = logging.getLogger(__name__)
 
-def module2_function():
-    logger.info('Entered module2_function')
-    # Perform some operations
-    logger.info('Exiting module2_function')
-
-def main():
-    from indented_logger import setup_logging
-    setup_logging(
-        level=logging.INFO,
-        include_func=True,
-        include_module=True,
-        func_module_format='{moduleName}:{funcName}',
-        use_logger_hierarchy=True
-    )
-    logger.info('Running module2 as main')
-    module2_function()
-
-if __name__ == '__main__':
-    main()
+def func_a():
+    logger.info("Inside func_a")
 ```
 
-### Running the Application
+#### `package_b/module_b1.py`
 
-- **Run the Main Application:**
+```python
+import logging
+from indented_logger import log_indent
+from package_b import module_b2
 
-  ```bash
-  python main.py
-  ```
+logger = logging.getLogger(__name__)
 
-- **Run `module1.py` Directly:**
+@log_indent
+def func_b1():
+    logger.info("Inside func_b1")
+    module_b2.func_b2()
+```
 
-  ```bash
-  python -m module1.module1
-  ```
+#### `package_b/module_b2.py`
 
-- **Run `module2.py` Directly:**
+```python
+import logging
+from indented_logger import log_indent
 
-  ```bash
-  python -m module2.module2
-  ```
+logger = logging.getLogger(__name__)
 
-**Expected Output:**
+@log_indent
+def func_b2():
+    logger.info("Inside func_b2")
+```
+
+#### Running the Application
+
+When you run `main.py`, the output will be:
 
 ```
-2024-08-15 12:34:56 - INFO     - Starting main function                               {__main__:main}
-2024-08-15 12:34:56 - INFO     -     Entered module1_function                         {module1.module1:module1_function}
-2024-08-15 12:34:56 - INFO     -         Entered module2_function                     {module2.module2:module2_function}
-2024-08-15 12:34:56 - INFO     -         Exiting module2_function                     {module2.module2:module2_function}
-2024-08-15 12:34:56 - INFO     -     Exiting module1_function                         {module1.module1:module1_function}
-2024-08-15 12:34:56 - INFO     - Finished main function                               {__main__:main}
+2024-10-16 21:55:26,908 - INFO     - Starting main                              {__main__:main}
+2024-10-16 21:55:26,909 - INFO     -     Inside func_a                          {module_a:func_a}
+2024-10-16 21:55:26,910 - INFO     -     Inside func_b1                         {package_b.module_b1:func_b1}
+2024-10-16 21:55:26,911 - INFO     -         Inside func_b2                     {package_b.module_b2:func_b2}
 ```
+
+- Logs from `module_a.py` are indented by one level due to `indent_modules=True`.
+- Logs from `module_b1.py` are indented further due to `indent_packages=True` and the use of `@log_indent`.
+- Logs from `module_b2.py` are indented even more, reflecting both the package depth and the function call hierarchy.
+
+## Customization
+
+You can customize the behavior of **Indented Logger** using various parameters in `setup_logging`:
+
+- `level`: Set the logging level (e.g., `logging.DEBUG`, `logging.INFO`).
+- `include_func`: Include function names in the log output.
+- `include_module`: Include module names in the log output.
+- `func_module_format`: Customize the format of the function and module information.
+- `indent_spaces`: Set the number of spaces per indentation level.
+- `truncate_messages`: Enable truncation of long messages.
+- `min_func_name_col`: Column position where function/module names should start.
+- `debug`: Enable debug mode for troubleshooting.
+
+## Conclusion
+
+While automatic indentation based on module transitions during application flow isn't feasible due to technical limitations, **Indented Logger** provides a robust and flexible solution to represent both your application's structure and execution flow.
+
+By leveraging:
+
+- **Automatic indentation based on module and package hierarchy** (`indent_modules`, `indent_packages`)
+- **Manual control over function call hierarchy using decorators** (`@log_indent`)
+
+You can create clear, organized, and hierarchical log outputs that significantly enhance readability and make debugging easier.
+
+
+
+
 
 ## Parameters for `setup_logging`
 
@@ -384,40 +390,7 @@ if __name__ == '__main__':
 - `indent_spaces` (int, optional): Number of spaces per indentation level. Default is `4`.
 - `datefmt` (str, optional): Date format string.
 
-### Example with All Parameters
 
-```python
-setup_logging(
-    level=logging.DEBUG,
-    include_func=True,
-    include_module=True,
-    func_module_format='{moduleName}:{funcName}',
-    truncate_messages=False,
-    min_func_name_col=100,
-    use_logger_hierarchy=True,
-    indent_spaces=4,
-    datefmt='%Y-%m-%d %H:%M:%S'
-)
-```
-
-## Benefits
-
-- **Enhanced Readability**: Visually represent the hierarchy and depth of operations in your logs.
-- **Organized Logs**: Group related log messages, making it easier to understand nested processes.
-- **Simplicity**: Minimalistic design adds just what you need without altering core logging functionalities.
-- **Customizable Formatting**: Control inclusion of function names, module names, alignment, and message truncation.
-- **Easy Integration**: Works with existing logging setups with minimal changes to your configuration.
-- **Flexible Indentation**: Supports automatic indentation via hierarchy and decorators, as well as manual indentation.
-
-## License
-
-`indented_logger` is released under the [MIT License](LICENSE).
-
----
-
-*Note: If you encounter any issues or have suggestions for improvements, feel free to open an issue or submit a pull request on GitHub.*
-
----
 
 ## Additional Details
 
