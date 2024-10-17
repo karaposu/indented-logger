@@ -1,4 +1,20 @@
-def smart_indent_log(logger_object, obj, lvl, exclude=None, name=None):
+import re
+
+def flatten_string(s):
+    """
+    Flattens the given multi-line string into a single line.
+
+    Parameters:
+    s (str): The multi-line string to flatten.
+
+    Returns:
+    str: A single-line string with all whitespace compressed.
+    """
+    # Replace all sequences of whitespace characters with a single space
+    flattened = re.sub(r'\s+', ' ', s).strip()
+    return flattened
+
+def smart_indent_log(logger_object, obj, lvl, exclude=None, name=None, flatten_long_strings=True):
     # Ensure 'exclude' is a list to avoid errors
     if exclude is None:
         exclude = []
@@ -21,4 +37,7 @@ def smart_indent_log(logger_object, obj, lvl, exclude=None, name=None):
                     f"{key}: List of length %s", len(value), extra={"lvl": lvl}
                 )
             else:
+                # Flatten the string if conditions are met
+                if flatten_long_strings and isinstance(value, str) and len(value) > 120:
+                    value = flatten_string(value)
                 logger_object.debug(f"{key}: %s", value, extra={"lvl": lvl})
