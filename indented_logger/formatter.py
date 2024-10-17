@@ -73,6 +73,9 @@ class IndentFormatter(logging.Formatter):
         asctime = self.formatTime(record, self.datefmt)
         levelname = f"{record.levelname:<8}"
 
+        # Add coloring to asctime
+        asctime_colored = f"{BLUE}{asctime}{RESET}"
+
         # Add debug statements if debug mode is enabled
         if self.debug:
             print("DEBUG: record.name =", record.name)
@@ -112,11 +115,20 @@ class IndentFormatter(logging.Formatter):
             # Set the record's message to our formatted message
             record.msg = message
             record.args = ()
-            return super().format(record)
+
+            # Format the message using the parent class
+            formatted_message = super().format(record)
+
+            # Now replace the asctime with the colored asctime
+            if self.usesTime():
+                formatted_message = formatted_message.replace(asctime, asctime_colored, 1)
+
+            return formatted_message
         finally:
             # Restore the original message and arguments
             record.msg = original_msg
             record.args = original_args
+
 
 # Define ANSI color codes
 RESET = '\033[0m'
