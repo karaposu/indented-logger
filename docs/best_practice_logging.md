@@ -1,5 +1,8 @@
 # Guide to Setting Up Logging in a Multi-Module Python Application
 
+- best practices of logger usage.
+- how to use loggers in classes and modules
+
 Proper logging is essential for monitoring, debugging, and maintaining applications, especially as they grow in complexity with multiple modules and packages. This guide will walk you through best practices for setting up logging in a Python application with many modules, incorporating features from the `indented_logger` package for enhanced readability.
 
 ---
@@ -359,6 +362,24 @@ Setting up logging correctly in a multi-module application ensures that logs are
 
 ---
 
+
+## 1. Best Practices for Logging in Libraries (PyPI Packages)
+
+When writing a library or package intended for others to use, it's important to follow logging best practices to avoid interfering with the user's application logging configuration.
+
+### **A. Do Not Configure Logging Handlers or Levels in Libraries**
+
+- **Avoid Adding Handlers:** Libraries should not add handlers (like `StreamHandler` or `FileHandler`) to loggers. Adding handlers at the library level can lead to duplicate log messages or unexpected logging behavior in the user's application.
+  
+- **Avoid Setting Logger Levels:** Libraries should not set logging levels for loggers (`logger.setLevel`). This should be left to the user's application to configure.
+
+**Your module-level logging configuration should be removed or limited to the `if __name__ == "__main__":` block.**
+
+### **B. Use Module-Level Loggers Without Configuration**
+
+In your library code, you should obtain a logger using `logging.getLogger(__name__)` and use it without adding handlers or setting levels.
+
+
 ## Further Reading and Resources
 
 - **Python Logging Documentation**: [https://docs.python.org/3/library/logging.html](https://docs.python.org/3/library/logging.html)
@@ -366,6 +387,18 @@ Setting up logging correctly in a multi-module application ensures that logs are
 - **Best Practices for Python Logging**: Articles and tutorials on effective logging strategies in Python applications.
 
 ---
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
