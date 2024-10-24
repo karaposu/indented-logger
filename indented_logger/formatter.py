@@ -5,7 +5,7 @@ from .indent import get_indent_level
 
 class IndentFormatter(logging.Formatter):
     def __init__(self, include_func=False, include_module=False, func_module_format=None,
-                 truncate_messages=False, min_func_name_col=80, indent_modules=False,
+                 truncate_messages=False, min_func_name_col=120, indent_modules=False,
                  indent_packages=False, datefmt=None, indent_spaces=4, debug=False):
         self.include_func = include_func
         self.include_module = include_module
