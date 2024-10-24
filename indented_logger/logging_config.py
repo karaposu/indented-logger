@@ -4,7 +4,7 @@ import logging
 from .formatter import IndentFormatter
 
 def setup_logging(level=logging.DEBUG, log_file=None, include_func=False, include_module=False,
-                  func_module_format=None, truncate_messages=False, min_func_name_col=80,
+                  func_module_format=None, truncate_messages=False, min_func_name_col=120,
                   indent_modules=False, indent_packages=False, indent_spaces=4, datefmt=None,
                   debug=False):
     # Create the formatter with the new parameters
