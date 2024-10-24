@@ -6,10 +6,8 @@ setup_logging(
     level=logging.DEBUG,
     include_func=True,
     include_module=True,
-    func_module_format='{funcName}',
     truncate_messages=False,
-    min_func_name_col=80,
-    use_logger_hierarchy=True,
+    min_func_name_col=120,
     indent_spaces=4
 )
 
@@ -20,7 +18,10 @@ logger = logging.getLogger(__name__)
 from examples.module1.module1 import module1_function
 
 def main():
-    logger.info('Starting main function')
+    # logger.info('Starting main function',extra={"color": "RED"})
+
+    logger.debug("Starting main function", extra={"lvl": 5, "c": "red"})
+    logger.debug("Starting main function", extra={"lvl": 5})
     module1_function()
     logger.info('Finished main function')
 
