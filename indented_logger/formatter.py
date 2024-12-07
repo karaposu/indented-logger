@@ -18,7 +18,7 @@ class IndentFormatter(logging.Formatter):
     def __init__(self, include_func=False, include_module=False, func_module_format=None,
                  truncate_messages=False, min_func_name_col=120, indent_modules=False,
                  indent_packages=False, datefmt=None, indent_spaces=4, debug=False,
-                 disable_colors=False, disable_indent=False):
+                 disable_colors=False, disable_indent=False, no_datetime=False):
         self.include_func = include_func
         self.include_module = include_module
         self.truncate_messages = truncate_messages
@@ -29,6 +29,7 @@ class IndentFormatter(logging.Formatter):
         self.debug = debug
         self.disable_colors = disable_colors
         self.disable_indent = disable_indent
+        self.no_datetime = no_datetime
 
         self.func_module_format = self.build_func_module_format(func_module_format)
 
@@ -93,18 +94,20 @@ class IndentFormatter(logging.Formatter):
         return ''
 
     def apply_padding(self, asctime, levelname, message, func_module_info):
+        # If datetime is not included, asctime is empty
+        asctime_text = '' if self.no_datetime else asctime
         stripped_message = self.strip_color_codes(message) if not self.disable_colors else message
-        current_length = len(asctime) + 3 + len(levelname) + 3 + len(stripped_message)
+        current_length = len(asctime_text) + (3 if asctime_text else 0) + len(levelname) + 3 + len(stripped_message)
         desired_column = self.min_func_name_col
-
         return ' ' * max(0, desired_column - current_length) if func_module_info else ''
 
     def format(self, record):
         indent = self.get_indent(record)
         message = self.get_colored_message(record, indent)
 
-        asctime = self.formatTime(record, self.datefmt)
-        asctime_colored = self.apply_colors(asctime, 'cyan') if not self.disable_colors else asctime
+        # If no_datetime is True, we won't format time
+        asctime = self.formatTime(record, self.datefmt) if not self.no_datetime else ''
+        asctime_colored = self.apply_colors(asctime, 'cyan') if (not self.disable_colors and not self.no_datetime) else asctime
 
         levelname = f"{record.levelname:<8}"
         func_module_info = self.get_func_module_info(record)
@@ -120,8 +123,26 @@ class IndentFormatter(logging.Formatter):
 
             formatted_message = super().format(record)
 
-            if self.usesTime() and not self.disable_colors:
-                formatted_message = formatted_message.replace(asctime, asctime_colored, 1)
+            # Remove datetime from the formatted message if no_datetime is True
+            if self.no_datetime:
+                # original fmt: '%(asctime)s - %(levelname)-8s - %(message)s'
+                # Remove the asctime and the trailing ' - ' that follows it
+                # Since asctime might be empty, we just ensure we don't leave double dashes
+                parts = formatted_message.split(' - ', 2)
+                if len(parts) > 1:
+                    # parts[0]: asctime, parts[1]: level, parts[2]: rest
+                    # if no_datetime: we just don't include asctime
+                    # Rebuild string without asctime
+                    if len(parts) == 3:
+                        # [asctime, level, message(+func)]
+                        formatted_message = f"{parts[1]} - {parts[2]}"
+                    else:
+                        # If formatting changed, fallback
+                        formatted_message = ' - '.join(parts[1:])
+
+            else:
+                if self.usesTime() and not self.disable_colors:
+                    formatted_message = formatted_message.replace(asctime, asctime_colored, 1)
 
             return formatted_message
         finally:

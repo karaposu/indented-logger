@@ -16,7 +16,8 @@ def setup_logging(level=logging.DEBUG,
                   datefmt=None,
                   debug=False,
                   log_file_keep_ANSI=False,
-                  log_file_no_indent=False):
+                  log_file_no_indent=False, 
+                  no_datetime=False):
     """
     Set up logging with indentation and optional file output.
 
@@ -66,7 +67,10 @@ def setup_logging(level=logging.DEBUG,
         indent_packages=indent_packages,
         indent_spaces=indent_spaces,
         datefmt=datefmt,
-        debug=debug
+        debug=debug,
+        disable_colors=False,
+        disable_indent=False,
+        no_datetime=no_datetime
     )
 
     # File formatter with optional removal of ANSI and indentation
@@ -85,7 +89,8 @@ def setup_logging(level=logging.DEBUG,
         datefmt=datefmt,
         debug=debug,
         disable_colors=(not log_file_keep_ANSI),
-        disable_indent=log_file_no_indent
+        disable_indent=log_file_no_indent,
+        no_datetime=no_datetime
     )
 
     logger = logging.getLogger()

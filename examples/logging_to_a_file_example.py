@@ -1,6 +1,9 @@
 from indented_logger import setup_logging, log_indent
 import logging
 
+# to test this from indented_logger root
+# python -m examples.logging_to_a_file_example 
+
 # Configure to log both to console and file:
 # - Console: With ANSI colors and indentation
 # - File: No ANSI colors, no indentation
@@ -9,7 +12,8 @@ setup_logging(
     log_file='application.log',
     include_func=True,
     log_file_keep_ANSI=False,    # No ANSI in file
-    log_file_no_indent=False      # No indentation in file logs
+    log_file_no_indent=False ,     # No indentation in file logs
+     no_datetime=True
 )
 
 logger = logging.getLogger(__name__)

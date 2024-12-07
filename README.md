@@ -19,6 +19,9 @@ For detailed documentation which talks about best practices and limitations, see
 ______
 
 
+no_datetime, which, if set to True, will omit the datetime portion from the log output. This is useful in scenarios where the logging infrastructure (e.g., Google Cloud Logging / Cloud Operations) already provides a timestamp and adding a local datetime is redundant.
+
+
 
 ## Installation
 
@@ -372,23 +375,53 @@ By leveraging:
 You can create clear, organized, and hierarchical log outputs that significantly enhance readability and make debugging easier.
 
 
+## Parameters
 
+- **level** (int, default: `logging.DEBUG`):  
+  Sets the global logging level. Use `logging.DEBUG` for verbose output, `logging.INFO` for general messages, or `logging.WARNING`/`logging.ERROR` for fewer, more critical logs.
 
+- **log_file** (str or None, default: `None`):  
+  If provided, logs will also be written to the specified file. This allows persistent record keeping of logs.
 
-## Parameters for `setup_logging`
+- **include_func** (bool, default: `False`):  
+  If `True`, include the name of the logging function in the log message.
 
-- `level` (int): Logging level (e.g., `logging.INFO`, `logging.DEBUG`).
-- `include_func` (bool, optional): Include function names in log messages. Default is `False`.
-- `include_module` (bool, optional): Include module names in log messages. Default is `False`.
-- `func_module_format` (str, optional): Format string for combining function and module names. Default is `'{funcName}'`.
-  - Placeholders:
-    - `{funcName}`: Function name.
-    - `{moduleName}`: Module (logger) name.
-- `truncate_messages` (bool, optional): Truncate long messages. Default is `False`.
-- `min_func_name_col` (int, optional): Column at which function/module names should start. Default is `80`.
-- `use_logger_hierarchy` (bool, optional): Indent logs based on the logger's name hierarchy. Default is `False`.
-- `indent_spaces` (int, optional): Number of spaces per indentation level. Default is `4`.
-- `datefmt` (str, optional): Date format string.
+- **include_module** (bool, default: `False`):  
+  If `True`, include the name of the module (logger name) in the log message.
+
+- **func_module_format** (str or None, default: `None`):  
+  A format string specifying how to display the function and module names. Use `{funcName}` and `{moduleName}` as placeholders. If not provided, a sensible default is chosen based on `include_func` and `include_module`.
+
+- **truncate_messages** (bool, default: `False`):  
+  If `True`, long messages will be truncated for cleaner, more readable output.
+
+- **min_func_name_col** (int, default: `120`):  
+  The column at which the function/module name information starts, allowing for consistent alignment of log messages.
+
+- **indent_modules** (bool, default: `False`):  
+  If `True`, logs from modules other than `__main__` are automatically indented, helping visually distinguish which parts of the code produce which logs.
+
+- **indent_packages** (bool, default: `False`):  
+  If `True`, indentation is based on the depth of the package hierarchy. Deeper package structures result in increased indentation.
+
+- **indent_spaces** (int, default: `4`):  
+  The number of spaces used for each indentation level.
+
+- **datefmt** (str or None, default: `None`):  
+  Custom datetime format string for timestamps. If not set, a default format is used.
+
+- **debug** (bool, default: `False`):  
+  If `True`, enables debug mode for the formatter itself, which can be helpful when troubleshooting logging configuration issues.
+
+- **log_file_keep_ANSI** (bool, default: `False`):  
+  If `False`, ANSI color codes are stripped from logs written to the file. Set `True` to preserve colors in the file logs.
+
+- **log_file_no_indent** (bool, default: `False`):  
+  If `True`, indentation logic (based on modules, packages, and function calls) is disabled for file logs, resulting in a cleaner, left-aligned output in the file.
+
+- **no_datetime** (bool, default: `False`):  
+  If `True`, the datetime portion is omitted from the logs entirely. Useful if your log processing infrastructure (e.g., GCP Log Explorer) already timestamps logs.
+
 
 
 
